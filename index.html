@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Create Your Redirect Link</title>
+<link rel="icon" type="image/png" href="/favicon.png">
+<style>
+body {
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f0f0f0;
+  color: #333;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-mode {
+  background: #333;
+  color: #f0f0f0;
+}
+
+.container {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 40px;
+  text-align: center;
+  transition: background-color 0.3s;
+}
+
+body.dark-mode .container {
+  background: rgba(51, 51, 51, 0.25);
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  transition: color 0.3s;
+}
+
+body.dark-mode label {
+  color: #f0f0f0;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #0069d9;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+body.dark-mode a {
+  color: #999;
+}
+
+.generated-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+/* Dark mode toggle button styles */
+#darkModeButton {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  color: #555; /* Dark gray color in light mode */
+  transition: color 0.3s;
+}
+
+#darkModeButton::before {
+  content: '\2600';
+}
+
+body.dark-mode #darkModeButton::before {
+  content: '\263E';
+  color: #f0f0f0; /* White color in dark mode */
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  margin-right: 10px;
+}
+
+.container p {
+  margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<button id="darkModeButton" onclick="toggleDarkMode()"></button>
+
+<div class="container">
+  <h1>GripEify: URL shortner with IP grabber</h1>
+  <p>Generate a unique link that collects IP addresses and geolocations for security purposes and then redirects end user to desired destination.</p>
+
+  <div class="input-group">
+    <label for="targetUrl">Enter your target URL:</label>
+    <input type="text" id="targetUrl" name="targetUrl" placeholder="https://www.example.com">
+  </div>
+
+  <button onclick="generateLink()">Generate Link</button>
+
+  <div id="generatedLink"></div>
+</div>
+
+<script>
+function generateLink() {
+  const targetUrl = document.getElementById("targetUrl").value;
+  if (targetUrl === "") {
+    alert("Please enter a target URL.");
+    return;
+  }
+
+  fetch('/save-link', { 
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url: targetUrl })
+  })
+  .then(response => response.json())
+  .then(data => {
+    const uniqueId = data.id;
+    const redirectLink = data.redirectLink;
+    const logsLink = `${window.location.origin}/logs/${uniqueId}`;
+
+    document.getElementById("generatedLink").innerHTML = `
+      <div class="generated-links">
+        <span>Your personalized redirect link: <a href="${redirectLink}">${redirectLink}</a></span>
+        <button onclick="window.location.href='${logsLink}'">View Logs</button>
+      </div>
+    `;
+  })
+  .catch(error => {
+    console.error('Error saving link:', error);
+  });
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle("dark-mode");
+}
+</script>
+
+</body>
+</html>
